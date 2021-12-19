@@ -1,0 +1,212 @@
+<?php include('db_connect.php');?>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@1,200&family=Roboto+Slab&display=swap" rel="stylesheet">
+
+<style>
+
+.card-header{
+	font-family:'Merriweather', serif;
+	background-color:white;
+	font-size:20px;
+	padding-left:700px;
+	letter-spacing:2px;
+	border-color:#ee959e;
+}
+.text-center{
+	font-size:16px;
+}
+.card{
+	border-color:#ee959e;
+	font-family: 'Raleway', sans-serif;
+	font-family: 'Roboto Slab', serif;
+	border-radius:10px;
+	font-size:15px;
+}
+td{
+	font-size:15px;
+}
+.badge{
+	font-size:13px;
+	padding-top:5px;
+	padding-bottom:5px;
+	letter-spacing:2px;
+}
+
+</style>
+
+<div class="container-fluid">
+	
+	<div class="col-lg-12">
+		<div class="row">
+			<!-- Table Panel -->
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-header text-center">
+						<form method="POST" class="form-inline" action="print/return_print.php">
+							<div class="input-group">
+								<div class="input-group-addon">
+									<small>From</small> &nbsp
+								</div>
+								<input type="date" class="form-control pull-right col-sm-12" name="from" max="<?php echo date("Y-m-d"); ?>" required>
+							</div>
+							<Br>
+							<Br>
+							<div class="input-group">
+								<div class="input-group-addon">&nbsp
+									<small>To</small> &nbsp
+								</div>
+								&nbsp&nbsp<input type="date" class="form-control pull-right col-sm-12" name="to" max="<?php echo date("Y-m-d"); ?>" required>
+							</div>
+							<input class="btn btn-sm btn-success ml-5" style="width:150px; background-color:#bc5449; color:white; border-color:#bc5449;height:32px; font-size:18px; letter-spacing:2px;" name="print" type="submit" formtarget="_blank" value="Print">
+						</form>
+					</div>
+					<div class="card-header">
+						<b>Return Order List</b>
+						 <span class="float:right"><a class="btn btn-primary btn-sm col-sm-3 float-right" style="border-radius:5px; background-color:#ee959e; color:white; border-color:#ee959e; height:30px; padding-top:5px; font-size:15px;" href="index.php?page=manage_ro" id="">
+		                    <i class="fa fa-plus"></i> New Entry 
+		                </a></span>
+					</div>
+					<div class="card-body">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th class="text-center">#</th>
+									<th class="text-center">Date/Time</th>
+									<th class="text-center">Code</th>
+									<th class="text-center">Supplier</th>
+									<th class="text-center">Total Amount</th>
+									<th class="text-center">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php 
+								$i = 1;
+								$bo = $conn->query("SELECT r.*,s.name as sname FROM return_order r inner join suppliers s on s.id = r.supplier_id order by r.status asc ,unix_timestamp(r.date_created) desc");
+								while($row=$bo->fetch_assoc()):
+								?>
+								<tr>
+									<td class="text-center"><?php echo $i++ ?></td>
+									<td class="">
+										<p><b><?php echo date("M d, Y H:i A",strtotime($row['date_created'])) ?></b></p>
+									</td>
+									<td class="">
+										<p><b> <?php echo $row['ro_code'] ?></b></p>
+									</td>
+									<td class="">
+										<p><b><?php echo ucwords($row['sname']) ?></b></p>
+									</td>
+									<td class="text-right">
+										<b><?php echo number_format($row['total_cost'],2) ?></b>
+									</td>
+									<td class="text-center">
+										<button class="btn btn-sm btn-primary edit_ro" style="width:80px; border-radius:5px; background-color:#957dad; color:white; border-color:#957dad;height:25px; font-size:15px;"  type="button" onclick="location.href='index.php?page=manage_ro&id=<?php echo $row['id'] ?>'" data-json='<?php echo json_encode($row) ?>'>View</button>
+									</td>
+								</tr>
+								<?php endwhile; ?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- Table Panel -->
+		</div>
+	</div>	
+
+</div>
+<style>
+	
+	td{
+		vertical-align: middle !important;
+	}
+	td p {
+		margin:unset;
+	}
+	.custom-switch{
+		cursor: bointer;
+	}
+	.custom-switch *{
+		cursor: bointer;
+	}
+</style>
+<script>
+	$('#manage-bo').on('reset',function(){
+		$('input:hidden').val('')
+		$('.select2').val('').trigger('change')
+	})
+	
+	$('#manage-bo').submit(function(e){
+		e.preventDefault()
+		start_load()
+		$.ajax({
+			url:'ajax.php?action=save_ro',
+			data: new FormData($(this)[0]),
+		    cache: false,
+		    contentType: false,
+		    processData: false,
+		    method: 'boST',
+		    type: 'boST',
+			success:function(resp){
+				if(resp==1){
+					alert_toast("Data successfully added",'success')
+					setTimeout(function(){
+						location.reload()
+					},1500)
+
+				}
+				else if(resp==2){
+					alert_toast("Data successfully updated",'success')
+					setTimeout(function(){
+						location.reload()
+					},1500)
+
+				}
+			}
+		})
+	})
+	$('.delete_ro').click(function(){
+		_conf("Are you sure to delete this Return Order?","delete_ro",[$(this).attr('data-id')])
+	})
+	function delete_ro($id){
+		start_load()
+		$.ajax({
+			url:'ajax.php?action=delete_ro',
+			method:'POST',
+			data:{id:$id},
+			success:function(resp){
+				if(resp==1){
+					alert_toast("Data successfully deleted",'success')
+					setTimeout(function(){
+						location.reload()
+					},1500)
+
+				}
+			}
+		})
+	}
+	$('table').dataTable();
+
+	
+$(function() {
+		//Date range picker
+		$('#reservation').daterangepicker()
+		$('#daterange-btn').daterangepicker({
+				ranges: {
+					'Today': [moment(), moment()],
+					'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+					'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+					'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+					'This Month': [moment().startOf('month'), moment().endOf('month')],
+					'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+				},
+				startDate: moment().subtract(29, 'days'),
+				endDate: moment()
+			},
+			function(start, end) {
+				$('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+			}
+		)
+
+	});
+</script>

@@ -1,0 +1,31 @@
+change_log.txt
+*Purchase Order
+    - Auto Increment PO Code
+    - Printable (edit po -> print)
+        *print_po.php
+    -New status partially received (when received partial items only)
+        -updates to received when BO was received
+
+*Receiving
+    -Removed the add form  
+    - Printable (edit po -> print)
+        *print_receving.php
+    -Automatically creates a BO record when received PO partially
+
+*Back Order
+    -Removed add and edit (Since this was already automatic)
+        -deletes record when parent receiving po was deleted.
+        -updates record when parent receiving po was updated.
+    -Added status
+        -Pending
+        -received
+    -BO Code Auto Increment
+
+*Return Order (New Feature)
+    -Create, Edit, Delete Return Order
+    -Pritable record
+        -print_ro.php
+    -List all records
+
+
+    
