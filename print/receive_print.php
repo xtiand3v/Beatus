@@ -4,7 +4,7 @@
 	function generateRow($from, $to, $conn){
 		$contents = '';
         
-		$stmt = mysqli_query($conn,"SELECT * FROM receiving r INNER JOIN suppliers s ON s.id = r.supplier_id WHERE r.date_created BETWEEN '$from' AND '$to' order by r.date_created desc");
+		$stmt = mysqli_query($conn,"SELECT * FROM receiving r INNER JOIN suppliers s ON s.id = r.supplier_id WHERE DATE(r.date_created) BETWEEN '$from' AND '$to' order by r.date_created desc");
 		while($row = mysqli_fetch_array($stmt)){
             $poid = $row['po_id'];
             $po = mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM purchase_order WHERE id = '$poid'"));
@@ -31,8 +31,8 @@
 	}
 
 	if(isset($_POST['print'])){
-		$from = $_POST['from'];
-		$to =  $_POST['to'];
+		$from = $_POST['min'];
+		$to =  $_POST['max'];
 		$from_title = date('M d, Y', strtotime($from));
 		$to_title = date('M d, Y', strtotime($to));
 

@@ -5,13 +5,13 @@
 <div class="container-fluid">
     <div class="col-lg-12">
         <div class="card">
-					<div class="card-header text-center">
+				<div class="card-header text-center">
 						<form method="GET" class="form-inline">
 							<div class="input-group">
 								<div class="input-group-addon">
 									<small>From</small> &nbsp
 								</div>
-								<input type="date" class="form-control pull-right col-sm-12" name="from" max="<?php echo date("Y-m-d"); ?>" required>
+								<input type="date" class="form-control pull-right col-sm-12" placeholder="yyyy-MM-dd" name="from" max="<?php echo date("Y-m-d"); ?>" required id="from">
 							</div>
 							<Br>
 							<Br>
@@ -19,8 +19,8 @@
 								<div class="input-group-addon">&nbsp
 									<small>To</small> &nbsp
 								</div>
-								&nbsp&nbsp<input type="date" class="form-control pull-right col-sm-12" name="to" max="<?php echo date("Y-m-d"); ?>" required>
-                                <input type="hidden" name="page" value="sales_report" hidden>
+								&nbsp&nbsp<input type="date" placeholder="yyyy-MM-dd" class="form-control pull-right col-sm-12" name="to" max="<?php echo date("Y-m-d"); ?>" id="to">
+								<input type="hidden" name="page" value="sales_report">
 							</div>
 							<input class="btn btn-sm btn-success ml-5" style="width:120px; background-color:#bc5449; color:white; border-color:#bc5449;height:30px; font-size:15px; letter-spacing:2px;" name="submit" type="submit" value="Submit">
 						</form>
@@ -37,7 +37,7 @@
             <div class="row justify-content-center pt-4">
                 <label for="" class="mt-2">Daily</label>
                 <div class="col-sm-3">
-                    <input type="date" name="day" id="day" value="<?php echo $day ?>" max="<?php echo $day ?>" class="form-control">
+                    <input type="date" name="day" id="day" value="<?php echo $day ?>" max="<?php echo date('Y-m-d'); ?>" class="form-control">
                 </div>
             </div>
             <hr>
@@ -119,9 +119,21 @@
                 </table>
                 <hr>
                 <div class="col-md-12 mb-4">
-                    <center>
-                        <button class="btn btn-success btn-sm col-sm-3" type="button" id="print"><i class="fa fa-print"></i> Print</button>
-                    </center>
+						<?php 
+                if(isset($_GET['from'] )):
+                ?>
+                <div class="text-center">
+						<form method="POST" action="print/sales_print.php">
+                        <input type="date" hidden value="<?php echo $_GET['from']; ?>" class="form-control pull-right col-sm-12" name="min" required id="min">
+				<input type="date" hidden value="<?php if($_GET['to'] != ''): echo $_GET['to']; else: echo $_GET['from']; endif; ?>" class="form-control pull-right col-sm-12" name="max" id="max">
+							<input class="btn btn-sm btn-success ml-5" style="width:150px; background-color:#bc5449; color:white; border-color:#bc5449;height:32px; font-size:18px; letter-spacing:2px;" name="print" type="submit" formtarget="_blank" value="Print">
+                        </form>
+                <?php else: 
+                ?>
+                <center>
+                    <button class="btn btn-success btn-sm col-sm-3" type="button" id="print"><i class="fa fa-print"></i> Print</button>
+                </center>
+                <?php endif; ?>
                 </div>
             </div>
             </div>

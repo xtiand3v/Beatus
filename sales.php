@@ -98,6 +98,10 @@
 								$i = 1;
 								$order = $conn->query("SELECT * FROM sales order by unix_timestamp(date_created) desc ");
 								while ($row = $order->fetch_assoc()) :
+									$id = $row['id'];
+									$void = $conn->query("SELECT * FROM voided WHERE sales_id = '" . $row['id'] . "' ");
+									
+
 								?>
 									<tr>
 										<td class="text-center"><?php echo $i++ ?></td>
@@ -110,6 +114,15 @@
 										<td class="text-center">
 											<button class="btn btn-sm btn-outline-primary " style="width:80px; border-radius:5px; background-color:#c38888; color:white; border-color:#c38888; height:25px; font-size:15px;" type="button" onclick="location.href='pos/index.php?id=<?php echo $row['id'] ?>'" data-id="<?php echo $row['id'] ?>">Edit</button>
 											<button class="btn btn-sm btn-outline-danger delete_order" style="width:80px; border-radius:5px; background-color:#990f02; color:white; border-color:#990f02; height:25px; font-size:15px;" type="button" data-id="<?php echo $row['id'] ?>">Delete</button>
+											<?php 
+											if($void->num_rows < 1):
+											?>
+											<a href="index.php?page=void&id=<?php echo $id; ?>" class="btn btn-sm btn-success">Void</a>
+											<?php else :
+												?>
+												<a href="" class="btn btn-sm btn-danger disabled">Voided</a>
+												<?php
+											 endif; ?>
 										</td>
 									</tr>
 								<?php endwhile; ?>

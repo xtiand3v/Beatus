@@ -3,7 +3,7 @@
 
 	function generateRow($from, $to, $conn){
 		$contents = '';
-		$stmt = mysqli_query($conn,"SELECT * FROM purchase_order p INNER join suppliers s on s.id = p.supplier_id WHERE p.date_created BETWEEN '$from' AND '$to' order by p.date_created desc");
+		$stmt = mysqli_query($conn,"SELECT * FROM purchase_order p INNER join suppliers s on s.id = p.supplier_id WHERE DATE(p.date_created) BETWEEN '$from' AND '$to' order by p.date_created desc");
 		while($row = mysqli_fetch_array($stmt)){
 			$getTotal = mysqli_query($conn,"SELECT SUM(total_cost) as total from purchase_order WHERE date_created BETWEEN '$from' AND '$to'");
 			$data = mysqli_fetch_array($getTotal);
@@ -36,8 +36,8 @@
 	}
 
 	if(isset($_POST['print'])){
-		$from = $_POST['from'];
-		$to =  $_POST['to'];
+		$from = $_POST['min'];
+		$to =  $_POST['max'];
 		$from_title = date('M d, Y', strtotime($from));
 		$to_title = date('M d, Y', strtotime($to));
 

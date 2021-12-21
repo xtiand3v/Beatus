@@ -22,7 +22,7 @@ if (isset($_GET['id'])) {
     if($query){
         $getPO = mysqli_fetch_array(mysqli_query($conn,"SELECT * FROM purchase_order order by id desc limit 1"));
         $po_id = $getPO['id'];
-        mysqli_query($conn,"INSERT INTO po_items (po_id,item_id,qty,price,date_created) VALUES ('$item_id','$item_id','$quantity','$price',NOW())");
+        mysqli_query($conn,"INSERT INTO po_items (po_id,item_id,qty,price,date_created) VALUES ('$po_id','$item_id','$quantity','$price',NOW())");
         ?>
         <script>
             alert("Critical Item sent to PO");
@@ -33,6 +33,7 @@ if (isset($_GET['id'])) {
         ?>
         <script>
             alert("Failed to send critical item");
+            window.location.href = "index.php?page=purchase_order";
         </script>
         <?php
 

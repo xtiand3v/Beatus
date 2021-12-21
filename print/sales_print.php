@@ -3,7 +3,7 @@
 	function generateRow($from, $to, $conn){
 		$contents = '';
 	 	
-		$stmt = mysqli_query($conn,"SELECT * FROM sales LEFT JOIN users ON users.id=sales.user_id WHERE date_created BETWEEN '$from' AND '$to' ORDER BY date_created DESC");
+		$stmt = mysqli_query($conn,"SELECT * FROM sales LEFT JOIN users ON users.id=sales.user_id WHERE DATE(sales.date_created) BETWEEN '$from' AND '$to' ORDER BY date_created DESC");
 		while($row = mysqli_fetch_array($stmt)){
 			$getTotal = mysqli_query($conn,"SELECT SUM(total_amount) as total from sales WHERE date_created BETWEEN '$from' AND '$to'");
 			$data = mysqli_fetch_array($getTotal);
@@ -28,8 +28,8 @@
 	}
 
 	if(isset($_POST['print'])){
-		$from = $_POST['from'];
-		$to =  $_POST['to'];
+		$from = $_POST['min'];
+		$to =  $_POST['max'];
 		$from_title = date('M d, Y', strtotime($from));
 		$to_title = date('M d, Y', strtotime($to));
 

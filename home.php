@@ -140,7 +140,7 @@
                                 <div class="small-box p-3 text-white" style="background: #c38888;">
                                     <div class="inner">
                                         <?php
-                                        $stmt = $conn->query("SELECT SUM(amount_tendered) as total FROM sales");
+                                        $stmt = $conn->query("SELECT SUM(total_amount) as total FROM sales");
                                         $srow =  $stmt->fetch_assoc();
 
                                         $total = $srow['total'];
@@ -191,13 +191,13 @@
                                 <div class="small-box p-3 text-white" style="background: #c38888;">
                                     <div class="inner">
                                         <?php
-                                        $today = date('Y-m-d');
-                                        $stmt = $conn->query("SELECT SUM(total_amount) as total FROM sales WHERE date_created = '$today'");
-                                        $ssales =  $stmt->fetch_assoc();
+                                        $todays = date('Y-m-d');
+                                        $stmts = $conn->query("SELECT SUM(total_amount) as totals FROM sales WHERE DATE(date_created) = CURDATE()");
+                                        $ssales =  $stmts->fetch_assoc();
 
-                                        $total = $ssales['total'];
+                                        $totals = $ssales['totals'];
 
-                                        echo "<h3>Php " . number_format($total, 2) . "</h3>";
+                                        echo "<h3>Php " . number_format($totals, 2) . "</h3>";
 
                                         ?>
 
@@ -210,7 +210,22 @@
                         </div>
                     <?php endif; ?>
                     <hr>
+                    <hr>
                     <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="center">Sales Chart</label>
+                                <select id="date_type" class="form-control w-25">
+                                    <option value="daily">Daily</option>
+                                    <!-- <option value="weekly">Weekly</option> -->
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                                <canvas id="barChart1" width="900" height="500"></canvas>
+                                <canvas id="barChart" width="900" height="500" class="d-none"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid mt-5">
                         <div class="row">
                             <div class="col-md-6">
                                 <canvas id="myChart"></canvas>
@@ -621,58 +636,117 @@ foreach ($osales as $k => $v) {
     })
 </script>
 
-<!-- <script>
-$(function(){
-  var barChartCanvas = $('#barChart').get(0).getContext('2d')
-  var barChart = new Chart(barChartCanvas)
-  var barChartData = {
-    labels  : ["January", "February", "March", "April", "May", "June"],
-    datasets: [
-      {
-        label               : 'SALES',
-        fillColor           : 'rgba(60,141,188,0.9)',
-        strokeColor         : 'rgba(60,141,188,0.8)',
-        pointColor          : '#3b8bba',
-        pointStrokeColor    : 'rgba(60,141,188,1)',
-        pointHighlightFill  : '#fff',
-        pointHighlightStroke: 'rgba(60,141,188,1)',
-        data                : [10, 20, 30, 40, 50, 60]
-      }
-    ]
-  }
-  //barChartData.datasets[1].fillColor   = '#00a65a'
-  //barChartData.datasets[1].strokeColor = '#00a65a'
-  //barChartData.datasets[1].pointColor  = '#00a65a'
-  var barChartOptions                  = {
-    //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
-    scaleBeginAtZero        : true,
-    //Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines      : true,
-    //String - Colour of the grid lines
-    scaleGridLineColor      : 'rgba(0,0,0,.05)',
-    //Number - Width of the grid lines
-    scaleGridLineWidth      : 1,
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: true,
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines  : true,
-    //Boolean - If there is a stroke on each bar
-    barShowStroke           : true,
-    //Number - Pixel width of the bar stroke
-    barStrokeWidth          : 2,
-    //Number - Spacing between each of the X value sets
-    barValueSpacing         : 5,
-    //Number - Spacing between data sets within X values
-    barDatasetSpacing       : 1,
-    //String - A legend template
-    legendTemplate          : '<ul class="<%=name.toLowerCase()%>-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].fillColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
-    //Boolean - whether to make the chart responsive
-    responsive              : true,
-    maintainAspectRatio     : true
-  }
+<script>
+    $(document).ready(function() {
+                $.ajax({
+                    url: "http://localhost/beatusFinal/Beatus/data_monthly.php",
+                    method: "GET",
+                    success: function(data) {
+                        console.log(data)
+                        var month = [];
+                        var total = [];
 
-  barChartOptions.datasetFill = false
-  var myChart = barChart.Bar(barChartData, barChartOptions)
-  document.getElementById('legend').innerHTML = myChart.generateLegend();
+                        for (var i in data) {
+                            month.push(data[i].month);
+                            total.push(data[i].total);
+                        }
+
+                        var chartdata = {
+                            labels: month,
+                            datasets: [{
+                                label: 'Monthly Total Sales',
+                                backgroundColor: 'rgba(200, 200, 200, 0.75)',
+                                borderColor: 'rgba(200, 200, 200, 0.75)',
+                                hoverBackgroundColor: 'rgba(200, 200, 200, 1)',
+                                hoverBorderColor: 'rgba(200, 200, 200, 1)',
+                                data: total
+                            }]
+                        };
+
+                        var ctx = $("#barChart");
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: chartdata,
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+
+                        });
+
+                            },
+                            error: function(data) {
+                                console.log(data);
+                            }
+                        })
+                });
+
+
+                $(document).ready(function() {
+                $.ajax({
+                    url: "http://localhost/beatusFinal/Beatus/data_daily.php",
+                    method: "GET",
+                    success: function(data) {
+                        console.log(data)
+                        var day = [];
+                        var total = [];
+
+                        for (var i in data) {
+                            day.push(data[i].day);
+                            total.push(data[i].total);
+                        }
+
+                        var chartdata = {
+                            labels: day,
+                            datasets: [{
+                                label: 'Daily Total Sales',
+                                backgroundColor: 'rgba(200, 200, 200, 0.75)',
+                                borderColor: 'rgba(200, 200, 200, 0.75)',
+                                hoverBackgroundColor: 'rgba(200, 200, 200, 1)',
+                                hoverBorderColor: 'rgba(200, 200, 200, 1)',
+                                data: total
+                            }]
+                        };
+
+                        var ctx = $("#barChart1");
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: chartdata,
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+
+                        });
+
+                            },
+                            error: function(data) {
+                                console.log(data);
+                            }
+                        })
+                });
+
+
+                $(document).ready(function() {
+                    $('#date_type').on('change', function() {
+                        if(this.value == 'monthly'){
+                            $('#barChart').removeClass('d-none');
+                            $('#barChart1').addClass('d-none');
+                        }
+                        else if(this.value == 'daily'){
+                            $('#barChart').addClass('d-none');
+                            $('#barChart1').removeClass('d-none');
+                        }
 });
-</script> -->
+                })
+</script>

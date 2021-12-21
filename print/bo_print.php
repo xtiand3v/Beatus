@@ -4,7 +4,7 @@ include '../db_connect.php';
 function generateRow($from, $to, $conn)
 {
     $contents = '';
-    $stmt = $conn->query("SELECT b.*,s.name as sname,p.po_code FROM back_order b inner join purchase_order p on b.po_id = p.id inner join suppliers s on s.id = b.supplier_id WHERE b.date_created BETWEEN '$from' AND '$to' order by b.date_created desc");
+    $stmt = $conn->query("SELECT b.*,s.name as sname,p.po_code FROM back_order b inner join purchase_order p on b.po_id = p.id inner join suppliers s on s.id = b.supplier_id WHERE DATE(b.date_created) BETWEEN '$from' AND '$to' order by b.date_created desc");
     $num = 1;
     while ($row = $stmt->fetch_assoc()) :
 
@@ -23,8 +23,8 @@ function generateRow($from, $to, $conn)
 }
 
 if (isset($_POST['print'])) {
-    $from = $_POST['from'];
-    $to =  $_POST['to'];
+    $from = $_POST['min'];
+    $to =  $_POST['max'];
     $from_title = date('M d, Y', strtotime($from));
     $to_title = date('M d, Y', strtotime($to));
 

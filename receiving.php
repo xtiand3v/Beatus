@@ -46,12 +46,12 @@ td{
 				<div class="card">
 				
 				<div class="card-header text-center">
-						<form method="POST" class="form-inline" action="print/receive_print.php">
+						<form method="GET" class="form-inline">
 							<div class="input-group">
 								<div class="input-group-addon">
 									<small>From</small> &nbsp
 								</div>
-								<input type="date" class="form-control pull-right col-sm-12" name="from" max="<?php echo date("Y-m-d"); ?>" required>
+								<input type="date" class="form-control pull-right col-sm-12" placeholder="yyyy-MM-dd" name="from" max="<?php echo date("Y-m-d"); ?>" required id="from">
 							</div>
 							<Br>
 							<Br>
@@ -59,9 +59,10 @@ td{
 								<div class="input-group-addon">&nbsp
 									<small>To</small> &nbsp
 								</div>
-								&nbsp&nbsp<input type="date" class="form-control pull-right col-sm-12" name="to" max="<?php echo date("Y-m-d"); ?>" required>
+								&nbsp&nbsp<input type="date" placeholder="yyyy-MM-dd" class="form-control pull-right col-sm-12" name="to" max="<?php echo date("Y-m-d"); ?>" id="to">
+								<input type="hidden" name="page" value="receiving">
 							</div>
-							<input class="btn btn-sm btn-success ml-5" style="width:150px; background-color:#bc5449; color:white; border-color:#bc5449;height:32px; font-size:18px; letter-spacing:2px;" name="print" type="submit" formtarget="_blank" value="Print">
+							<input class="btn btn-sm btn-success ml-5" style="width:120px; background-color:#bc5449; color:white; border-color:#bc5449;height:30px; font-size:15px; letter-spacing:2px;" name="submit" type="submit" value="Submit">
 						</form>
 					</div>
 					<div class="card-header">
@@ -71,6 +72,20 @@ td{
 		                </a></span>
 					</div>
 					<div class="card-body">
+                <?php 
+                if(isset($_GET['from']) && $_GET['to'] != ""):
+                ?>
+                <div class="text-center">
+                    <h3>Receiving List</h3>
+                    <h4>From <?php echo date("F d, Y",strtotime($_GET['from'])); ?> to <?php echo date("F d, Y",strtotime($_GET['to'])); ?></h4>
+                </div>
+                <?php 
+			elseif(isset($_GET['from']) && $_GET['to'] == ""):
+				echo "<div class='text-center'>
+						<h3>Receiving List</h3>
+						<h4>For ".date("F d, Y",strtotime($_GET['from']))."</h4>
+					</div>";
+			endif; ?>
 						<table class="table table-bordered table-hover">
 							<thead>
 								<tr>
@@ -85,7 +100,17 @@ td{
 							<tbody>
 								<?php 
 								$i = 1;
+								if(isset($_GET['from']) && $_GET['to'] == ""){
+										$from = $_GET['from'];
+								$receiving = $conn->query("SELECT r.*,s.name as sname,p.po_code FROM receiving r inner join suppliers s on s.id = r.supplier_id inner join purchase_order p on r.po_id = p.id WHERE DATE(r.date_created) = '$from' order by unix_timestamp(r.date_created) desc");
+
+							} elseif(isset($_GET['from']) && $_GET['to'] != "") {
+								$from = $_GET['from'];
+								$to = $_GET['to'];
+								$receiving = $conn->query("SELECT r.*,s.name as sname,p.po_code FROM receiving r inner join suppliers s on s.id = r.supplier_id inner join purchase_order p on r.po_id = p.id where DATE(p.date_created) BETWEEN '$from' AND '$to' order by unix_timestamp(r.date_created) desc");
+							} else {
 								$receiving = $conn->query("SELECT r.*,s.name as sname,p.po_code FROM receiving r inner join suppliers s on s.id = r.supplier_id inner join purchase_order p on r.po_id = p.id order by unix_timestamp(r.date_created) desc");
+							}
 								while($row=$receiving->fetch_assoc()):
 								?>
 								<tr>
@@ -111,6 +136,18 @@ td{
 								<?php endwhile; ?>
 							</tbody>
 						</table>
+							<div class="text-center">
+						<form method="POST" action="print/receive_print.php">
+							
+						<?php 
+                if(isset($_GET['from'] )):
+                ?>
+				<input type="date" hidden value="<?php echo $_GET['from']; ?>" class="form-control pull-right col-sm-12" name="min" required id="min">
+				<input type="date" hidden value="<?php if($_GET['to'] != ''): echo $_GET['to']; else: echo $_GET['from']; endif; ?>" class="form-control pull-right col-sm-12" name="max" id="max">
+							<input class="btn btn-sm btn-success ml-5" style="width:150px; background-color:#bc5449; color:white; border-color:#bc5449;height:32px; font-size:18px; letter-spacing:2px;" name="print" type="submit" formtarget="_blank" value="Print">
+                <?php endif; ?>
+						</form>
+							</div>
 					</div>
 				</div>
 			</div>
